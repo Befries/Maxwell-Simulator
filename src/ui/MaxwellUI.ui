@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkWindow" id="Window">
+    <property name="title" translatable="1">Maxwell Simulator</property>
+    <property name="default-width">1100</property>
+    <property name="default-height">800</property>
+    <property name="resizable">1</property>
+    <property name="child">
+
+      <object class="GtkBox" id="TopBox">
+        <property name="homogeneous">0</property>
+        <child>
+          <object class="GtkDrawingArea" id="Canvas">
+            <property name="hexpand">1</property>
+            <property name="halign">fill</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="Separator">
+            <property name="orientation">vertical</property>
+            <property name="hexpand">0</property>
+            <property name="halign">baseline</property>
+            <property name="vexpand">0</property>
+            <property name="valign">baseline</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="ConfiguratorBox">
+            <property name="halign">end</property>
+            <property name="hexpand">0</property>
+            <property name="width-request">200</property>
+            <property name="margin-start">4</property>
+            <property name="margin-end">4</property>
+            <property name="margin-top">2</property>
+            <property name="margin-bottom">2</property>
+            <property name="vexpand">0</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkBox" id="RunBox">
+                <property name="homogeneous">1</property>
+                <child>
+                  <object class="GtkButton">
+                    <property name="hexpand">1</property>
+                    <property name="label" translatable="1">Run</property>
+                    <property name="receives-default">1</property>
+                    <property name="margin-start">4</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-top">4</property>
+                    <property name="margin-bottom">4</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="ResetButton">
+                    <property name="hexpand">1</property>
+                    <property name="visible">1</property>
+                    <property name="label" translatable="1">Reset</property>
+                    <property name="receives-default">1</property>
+                    <property name="margin-start">4</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-top">4</property>
+                    <property name="margin-bottom">4</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="RunTimeLabel">
+                    <property name="visible">1</property>
+                    <property name="label" translatable="1">label</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkExpander" id="Expander">
+                <property name="visible">1</property>
+                <child>
+                  <object class="GtkBox" id="ExpanderBox">
+                    <property name="visible">1</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="ExpanderLabel">
+                    <property name="visible">1</property>
+                    <property name="label" translatable="1">No Config</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="FileManagementBox">
+                <property name="visible">1</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkButton" id="LoadButton">
+                    <property name="valign">center</property>
+                    <property name="visible">1</property>
+                    <property name="label" translatable="1">Load config</property>
+                    <property name="receives-default">1</property>
+                    <property name="margin-start">4</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-top">4</property>
+                    <property name="margin-bottom">4</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="SaveBox">
+                    <property name="visible">1</property>
+                    <child>
+                      <object class="GtkButton" id="SaveButton">
+                        <property name="visible">1</property>
+                        <property name="label" translatable="1">Save GIF</property>
+                        <property name="receives-default">1</property>
+                        <property name="margin-start">4</property>
+                        <property name="margin-end">4</property>
+                        <property name="margin-top">4</property>
+                        <property name="margin-bottom">4</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="TimeSaveEntry">
+                        <property name="visible">1</property>
+                        <property name="text" translatable="1">time</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WIP">
+                    <property name="visible">1</property>
+                    <property name="label" translatable="1">WIP</property>
+                    <property name="receives-default">1</property>
+                    <property name="receives-default">1</property>
+                    <property name="margin-start">4</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-top">4</property>
+                    <property name="margin-bottom">4</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>
