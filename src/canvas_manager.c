@@ -35,7 +35,6 @@ void clear_canvas(cairo_t* cr) {
 int update_canvas(GtkWidget* widget) {
   
   cairo_t* cr;
-  double* current_display;
 
   cr = cairo_create(surface);
   clear_canvas(cr);
@@ -44,10 +43,8 @@ int update_canvas(GtkWidget* widget) {
   int canvas_height = gtk_widget_get_height(widget);
 
   // temporary test
-  int cols_amount = 4;
   
-  current_display = return_random_array(AMOUNT);
-  draw_grid(cr, AMOUNT, cols_amount, current_display, canvas_width, canvas_height);
+  draw_grid(cr, AMOUNT, get_cols_amount(), get_view_port(), canvas_width, canvas_height);
   
   cairo_destroy(cr);
   gtk_widget_queue_draw(widget);

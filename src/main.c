@@ -4,7 +4,7 @@
 static void activate_app(GtkApplication* app, gpointer user_data) {
   
   // initialize the field manager at the start
-  init_field_manager(AMOUNT);
+  init_field_manager(200, 200);
 
   GtkBuilder* builder = gtk_builder_new ();
   gtk_builder_add_from_file (builder, "./src/ui/MaxwellUI.ui", NULL);
