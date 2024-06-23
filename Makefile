@@ -4,7 +4,7 @@ LIB_REF=`pkg-config --libs gtk4`
 
 OBJ_DIR=build/obj
 SRC_DIR=src
-OBJECT_FILES=canvas_manager.o field_manager.o 
+OBJECT_FILES=canvas_manager.o field_manager.o materials.o utils.o
 HEADER_FILES=$(SRC_DIR)/*.h
 
 default: main

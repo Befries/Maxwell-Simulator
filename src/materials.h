@@ -3,6 +3,7 @@ typedef struct {
   double permittivity;
   double permeability;
   double conductivity;
+  double speed_squared;
 } material;
 
 material* getCustomMaterial(int key);

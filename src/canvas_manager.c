@@ -44,8 +44,8 @@ int update_canvas(GtkWidget* widget) {
 
   // temporary test
   
-  draw_grid(cr, AMOUNT, get_cols_amount(), get_view_port(), canvas_width, canvas_height);
-  
+  draw_grid(cr, get_points_amount(), get_cols_amount(), get_view_port(), canvas_width, canvas_height);
+
   cairo_destroy(cr);
   gtk_widget_queue_draw(widget);
   return 1;
@@ -58,8 +58,7 @@ void draw_grid(cairo_t* cr, int amount, int cols_amount, double* grid, double ca
   double atomic_width = canvas_width / cols_amount;
   double atomic_height = canvas_height / rows_amount;
   
-  int i = 0;
-  for (i; i < amount; i++) {
+  for (int i = 0; i < amount; i++) {
     cairo_set_source_rgba(cr, grid[i], grid[i], grid[i], 0.8);
     cairo_rectangle(cr,
                     (i % cols_amount) * atomic_width,
