@@ -1,21 +1,27 @@
 #include <stdlib.h>
+#include <math.h>
 #include <stdio.h>
 #include "field_manager.h"
 #include "materials.h"
 #include "utils.h"
 void normalize_intensity(double (*norm)(double*, int), double* intensity);
+void bound_view_port(double boundary);
 
 static material** properties;
+
 static double* fields[3]; 
 static double* fields_buffer[3];
 static int amount;
 static int cols_amount;
 
-static double dt = 0.01, dx = 0.01, dy = 0.01;
+static double dt = 0.0001, dx = 0.001, dy = 0.001;
 
 
 static double* view_port;
 static int mode = 0;
+
+double electric_boundary = 0.002;
+double magnetic_boundary = 0.0002;
 
 void update_view_port() {
   if (mode) {
@@ -24,15 +30,29 @@ void update_view_port() {
     }
   } else {
     for (int i = 0; i < amount; i++) {
-      view_port[i] = SQUARE((fields[0])[i]);
+      view_port[i] = fabs((fields[0])[i]);
     }
   }
+ 
+  //double test_max = max(view_port, amount);
+  //if (test_max > current_max) {
+    //current_max = test_max;
+    //printf("new max: %2.6f\n", current_max);
+  //}
 
-  normalize_intensity(infinity_norm, view_port);
+  bound_view_port(electric_boundary);
+  //bound_view_port(magnetic_boundary);
 }
+
+
+void bound_view_port(double boundary) {
+  for (int i = 0; i < amount; i++) view_port[i] = view_port[i]/boundary;
+}
+
 
 void normalize_intensity(double (*norm)(double*, int), double* intensity) {
   double normalizer = norm(intensity, amount);
+  if (normalizer == 0) return;
   for (int i = 0; i < amount; i++) intensity[i] = intensity[i]/normalizer;
 }
 
@@ -41,18 +61,22 @@ int get_points_amount() {
   return amount;
 }
 
+
 int get_cols_amount() {
   return cols_amount;
 }
 
+
 double* get_view_port() {
+  update_view_port();
   return view_port;
 }
 
 
 void init_field_manager(int _rows_amount, int _cols_amount) {
   
-  amount = _rows_amount * cols_amount;
+  amount = _rows_amount * _cols_amount;
+  printf("total amount of points: %d \n", amount);
   cols_amount = _cols_amount;
 
   // properties is an array of pointers to struct of the concerned materials
@@ -84,6 +108,17 @@ void clear_fields() {
 }
 
 
+double forward_difference(double* current_field, int index);
+double backward_difference(double* current_field, int index);
+double upward_difference(double* current_field, int index);
+double downward_difference(double* current_field, int index);
+
+double simple_centered_vertical_difference(double* current_field, int index);
+double simple_centered_horizontal_difference(double* current_field, int index);
+double advanced_centered_vertical_difference(double* current_field, int index);
+double advanced_centered_horizontal_difference(double* current_field, int index);
+
+
 void update_fields() {
   
   for (int i = 0; i < 3; i++) {
@@ -91,50 +126,87 @@ void update_fields() {
   }
 
   for (int i = 0; i < amount; i++) {
+    
+    // difference to calculate
+    double dxE, dyE, dxBy, dyBx;
 
     // difference calculation
-    double under_E = 0, under_Bx = 0;
-    int under_index = i - cols_amount;
-    if (under_index > 0) {
-       under_E = fields_buffer[0][under_index];
-       under_Bx = fields_buffer[1][under_index];
+    if (i < cols_amount) {
+      dyE = upward_difference(fields_buffer[0], i);
+      dyBx = upward_difference(fields_buffer[1], i); 
+    } else if (i + cols_amount >= amount) {
+      dyE = downward_difference(fields_buffer[0], i);
+      dyBx = downward_difference(fields_buffer[1], i);
+    } else if (i < 2*cols_amount || i + 2*cols_amount >= amount) {
+      dyE = simple_centered_vertical_difference(fields_buffer[0], i);
+      dyBx = simple_centered_vertical_difference(fields_buffer[1], i);
+    } else {
+      dyE = advanced_centered_vertical_difference(fields_buffer[0], i);
+      dyBx = advanced_centered_vertical_difference(fields_buffer[1], i);
     }
 
-    double upper_E = 0, upper_Bx = 0;
-    int upper_index = i + cols_amount;
-    if (upper_index < cols_amount) {
-       upper_E = fields_buffer[0][upper_index];
-       upper_Bx = fields_buffer[1][upper_index];
+    if (i % cols_amount <= 0) {
+      dxE = forward_difference(fields_buffer[0], i);
+      dxBy = forward_difference(fields_buffer[2], i);
+    } else if (i % cols_amount >= cols_amount - 1) {
+      dxE = backward_difference(fields_buffer[0], i);
+      dxBy = backward_difference(fields_buffer[2], i);
+    } else if (i % cols_amount <= 1 || i % cols_amount >= cols_amount - 2) {
+      dxE = simple_centered_horizontal_difference(fields_buffer[0], i);
+      dxBy = simple_centered_horizontal_difference(fields_buffer[2], i);
+    } else {
+      dxE = advanced_centered_horizontal_difference(fields_buffer[0], i);
+      dxBy = advanced_centered_horizontal_difference(fields_buffer[2], i);      
     }
 
-    double left_E = 0, left_By = 0;
-    if (i % cols_amount > 0) {
-      int left_index = i - 1;
-      left_E = fields_buffer[0][left_index];
-      left_By = fields_buffer[2][left_index];
-    }
+    // manually added current
+    double J = 0;
+    if (i%cols_amount == (int)(0.4312 * cols_amount)) J = 1;
 
-    double right_E = 0, right_By = 0;
-    if (i % cols_amount + 1 < cols_amount) {
-      int right_index = i + 1;
-      right_E = fields_buffer[0][right_index];
-      right_By = fields_buffer[2][right_index];
-    }
-    
     // todo: add user input to current
-    double current_term = (properties[i]->conductivity * fields[0][i]) / properties[i]->permittivity;
-    double dxBy = (right_By - left_By) / (2 * dx);
-    double dyBx = (upper_Bx - under_Bx) / (2 * dy);
+    double current_term = (properties[i]->conductivity * fields[0][i] + J) / properties[i]->permittivity;
+    
     double difference_term = properties[i]->speed_squared * (dxBy - dyBx);
     fields[0][i] = fields_buffer[0][i] + dt * (difference_term - current_term);
-
-    double dyE = (upper_E - under_E) / (2 * dy);
     fields[1][i] = fields_buffer[1][i] - dt * dyE;
-
-    double dxE = (right_E - left_E) / (2 * dx);
     fields[2][i] = fields_buffer[2][i] + dt * dxE;
   }
- 
-  update_view_port();
 
+}
+
+
+// does O(dx^2) for the borders
+double forward_difference(double* current_field, int index) {
+  return (-current_field[index+2]+4*current_field[index+1]-3*current_field[index])/(2*dx);
+} 
+
+double backward_difference(double* current_field, int index) {
+  return (current_field[index-2]-4*current_field[index-1]+3*current_field[index])/(2*dx);
+}
+
+double upward_difference(double* current_field, int index) {
+  return (-current_field[index+2*cols_amount]+4*current_field[index+cols_amount]-3*current_field[index])/(2*dy);
+} 
+
+double downward_difference(double* current_field, int index) {
+  return (current_field[index-2*cols_amount]-4*current_field[index-cols_amount]+3*current_field[index])/(2*dy);
+}
+
+
+// does centered O(dx^2) for almost bordered
+double simple_centered_vertical_difference(double* current_field, int index) {
+  return (current_field[index+cols_amount]-current_field[index-cols_amount])/(2*dy);
+}
+
+double simple_centered_horizontal_difference(double* current_field, int index) {
+  return (current_field[index+1]-current_field[index-1])/(2*dx);
+}
+
+// does center O(dx^4) for every other points 
+double advanced_centered_vertical_difference(double* current_field, int index) {
+  return (-current_field[index+2*cols_amount]+8*current_field[index+cols_amount]-8*current_field[index-cols_amount]+current_field[index-2*cols_amount])/(12*dy);
+}
+
+double advanced_centered_horizontal_difference(double* current_field, int index) {
+  return (-current_field[index+2]+8*current_field[index+1]-8*current_field[index-1]+current_field[index-2])/(12*dx);
 }
