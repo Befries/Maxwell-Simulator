@@ -1,8 +1,10 @@
 #include "canvas_manager.h"
+#include "config_manager.h"
 
 
 static void activate_app(GtkApplication* app, gpointer user_data) {
   
+  read_config("./config");
   // initialize the field manager at the start
   init_field_manager(200, 200);
 
@@ -17,7 +19,7 @@ static void activate_app(GtkApplication* app, gpointer user_data) {
   
   gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(canvas), draw_canvas, NULL, NULL);
   g_signal_connect(GTK_DRAWING_AREA(canvas), "resize", G_CALLBACK(on_canvas_resize), NULL);
-  g_timeout_add(500, G_SOURCE_FUNC(update_canvas), GTK_WIDGET(canvas));
+  g_timeout_add(33, G_SOURCE_FUNC(update_canvas), GTK_WIDGET(canvas));
 
 
   gtk_widget_set_visible(GTK_WIDGET(window), true);
@@ -35,4 +37,3 @@ int main (int argc, char** argv) {
 
   return status;
 }
-
