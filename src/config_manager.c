@@ -1,9 +1,14 @@
 #include "config_manager.h"
+#include "field_manager.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
+// default config_info
+int width = 50, height = 50;
+
+// special config_info
 config_info faulty_line = {"faulty_line", "\0"};
 config_info end_of_config = {"end_of_config", "\0"};
 
@@ -28,9 +33,12 @@ void read_config(char* config_path) {
 
   fclose(config);
   info_set[info_amount] = end_of_config;
-  print_config(info_set);
 
+  set_entries(info_set);
+  print_config(info_set);
   free_config_reader(info_set);
+
+  init_config(); 
 }
 
 
@@ -38,7 +46,14 @@ void read_config(char* config_path) {
 void print_config(config_info* info_set) {
   int i = 0;
   while (strcmp(info_set[i].key, "end_of_config") != 0) {
-    printf("key: \"%s\", data:\"%s\" \n", info_set[i].key, info_set[i].data);
+    printf("key: \"%s\", data:\"%s\"", info_set[i].key, info_set[i].data);
+    switch(info_set[i].isValidKey) {
+      case 1: printf(", valid entry\n");
+      break;
+      case -1: printf(", key is not valid\n");
+      break;
+      default: printf(", error occured for its treatment");
+    }
     i++;
   } 
 }
@@ -50,8 +65,6 @@ config_info parse_line(char* line) {
   char key_buffer[MAX_KEY_LEN];
   char data_buffer[MAX_DATA_LEN];
   int key_length = 0;
-
-  printf("%s", line);
 
   for (; key_length <= MAX_KEY_LEN; key_length++) {
     if (line[key_length] == '\n') return faulty_line;
@@ -77,8 +90,17 @@ config_info parse_line(char* line) {
 }
 
 
-void init_config(config_info* info_set) {
+void set_entries(config_info *info_set) {
+  int i = 0;
+  while (strcmp(info_set[i].key, "end_of_config") != 0) {
+    info_set[i].isValidKey = scan_key(info_set[i]);
+    i++;
+  }
+}
 
+
+void init_config() {
+  init_field_manager(height, width);
 }
 
 
@@ -89,4 +111,17 @@ void free_config_reader(config_info* info_set) {
     free(info_set[i].data);
     i++;
   }
+}
+
+
+int scan_key(config_info info) {
+  if (strcmp(info.key, "width") == 0) {
+    width = atoi(info.data);
+    return 1;
+  } else if (strcmp(info.key, "height") == 0) {
+    height = atoi(info.data);
+    return 1;
+  }
+  // no match found
+  return -1;
 }
