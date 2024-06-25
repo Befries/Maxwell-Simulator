@@ -44,7 +44,7 @@
               <object class="GtkBox" id="RunBox">
                 <property name="homogeneous">1</property>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="RunButton">
                     <property name="hexpand">1</property>
                     <property name="label" translatable="1">Run</property>
                     <property name="receives-default">1</property>

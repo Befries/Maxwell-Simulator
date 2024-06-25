@@ -16,9 +16,9 @@ static int cols_amount;
 
 static double dt = 0.0001, dx = 0.001, dy = 0.001;
 
-
 static double* view_port;
 static int mode = 0;
+static int is_dirty = 0;
 
 double electric_boundary = 0.002;
 double magnetic_boundary = 0.0002;
@@ -68,10 +68,16 @@ int get_cols_amount() {
 
 
 double* get_view_port() {
-  update_view_port();
+  if(is_dirty) {
+    update_view_port();
+    is_dirty = 0;
+  }
   return view_port;
 }
 
+double get_dt() {
+  return dt;
+}
 
 void init_field_manager(int _rows_amount, int _cols_amount) {
   
@@ -105,6 +111,12 @@ void clear_fields() {
  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < amount; j++) (fields[i])[j] = 0;
   }
+  mark_dirty();
+}
+
+
+void mark_dirty() {
+  is_dirty = 1;
 }
 
 
@@ -161,7 +173,7 @@ void update_fields() {
 
     // manually added current
     double J = 0;
-    if (i%cols_amount == (int)(0.4312 * cols_amount)) J = 1;
+    if (i == (int)(0.4312 * amount)) J = 1;
 
     // todo: add user input to current
     double current_term = (properties[i]->conductivity * fields[0][i] + J) / properties[i]->permittivity;
@@ -171,6 +183,8 @@ void update_fields() {
     fields[1][i] = fields_buffer[1][i] - dt * dyE;
     fields[2][i] = fields_buffer[2][i] + dt * dxE;
   }
+
+  mark_dirty();
 
 }
 
