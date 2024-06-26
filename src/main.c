@@ -1,8 +1,14 @@
 #include "canvas_manager.h"
 #include "config_manager.h"
+#include "config_expander.h"
 
 static void activate_app(GtkApplication* app, gpointer user_data);
-static void free_carrier(gpointer data);
+
+static void free_carrier(GtkWidget* widget, gpointer data) {
+  struct modifiables* carrier = data;
+  g_print("freeing modifiables carrier");
+  free(carrier);
+}
 
 static void activate_app(GtkApplication* app, gpointer user_data) {
   
@@ -16,6 +22,9 @@ static void activate_app(GtkApplication* app, gpointer user_data) {
   GObject* window = gtk_builder_get_object(builder, "Window");
   gtk_window_set_application(GTK_WINDOW(window), app);
   
+  GObject* expander_box = gtk_builder_get_object(builder, "ExpanderBox");
+  init_expander(GTK_BOX(expander_box));
+
   // instantiate all modifiables;
   GObject* canvas = gtk_builder_get_object(builder, "Canvas");
   GObject* run_time_label = gtk_builder_get_object(builder, "RunTimeLabel");
@@ -25,6 +34,7 @@ static void activate_app(GtkApplication* app, gpointer user_data) {
   modifiables_carrier->run_time_label = GTK_LABEL(run_time_label);
 
   gtk_label_set_max_width_chars(GTK_LABEL(run_time_label), 12);
+  gtk_label_set_xalign(GTK_LABEL(run_time_label), 0.0);
   gtk_label_set_text(GTK_LABEL(run_time_label), "0000.0000\0");
   gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(canvas), draw_canvas, NULL, NULL);
   g_signal_connect(GTK_DRAWING_AREA(canvas), "resize", G_CALLBACK(on_canvas_resize), NULL);
@@ -36,8 +46,9 @@ static void activate_app(GtkApplication* app, gpointer user_data) {
 
   GObject* reset_button = gtk_builder_get_object(builder, "ResetButton");
   g_signal_connect(reset_button, "clicked", G_CALLBACK(reset_run), NULL);
-
   
+  g_signal_connect(window, "destroy", G_CALLBACK(free_carrier), modifiables_carrier);
+
   gtk_widget_set_visible(GTK_WIDGET(window), true);
   g_object_unref(builder);   
 }
