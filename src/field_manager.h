@@ -9,3 +9,4 @@ double get_dt();
 
 void clear_fields();
 void mark_dirty();
+void free_fields(); 

@@ -6,7 +6,6 @@ static void activate_app(GtkApplication* app, gpointer user_data);
 
 static void free_carrier(GtkWidget* widget, gpointer data) {
   struct modifiables* carrier = data;
-  g_print("freeing modifiables carrier");
   free(carrier);
 }
 

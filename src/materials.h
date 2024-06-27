@@ -6,6 +6,7 @@ typedef struct {
   double speed_squared;
 } material;
 
-material* getCustomMaterial(int key);
-material* getVoidMaterial();
-void addCustomMaterial(double permittivity, double permeability, double conductivity);
+material* get_custom_material(int key);
+material* get_void_material();
+void set_void_material(double permittivity, double permeability);
+void add_custom_material(double permittivity, double permeability, double conductivity);

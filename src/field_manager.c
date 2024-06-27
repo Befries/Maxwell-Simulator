@@ -88,7 +88,7 @@ void init_field_manager(int _rows_amount, int _cols_amount) {
   // properties is an array of pointers to struct of the concerned materials
   properties = malloc(amount * sizeof(material*));
   // initially, the whole space is void.
-  material* void_material = getVoidMaterial();
+  material* void_material = get_void_material();
   for (int i = 0; i < amount; i++) properties[i] = void_material;
   // W.I.P. rajouter demande config;
 
@@ -117,6 +117,15 @@ void clear_fields() {
 
 void mark_dirty() {
   is_dirty = 1;
+}
+
+
+void free_fields() {
+  for (int i = 0; i < 3; i++) {
+    free(fields[i]);
+    free(fields_buffer[i]);
+  }
+  free(view_port);
 }
 
 
