@@ -39,11 +39,13 @@ void toggle_run() {
   running = !running;
 }
 
+
 void reset_run() {
   running = 0;
   run_time = 0;
   clear_fields();
 }
+
 
 // update to the canvas each tick (main loop)
 int update_canvas(struct modifiables* ui_elements) {
@@ -61,8 +63,6 @@ int update_canvas(struct modifiables* ui_elements) {
     run_time += get_dt();
   }
 
-
-  
   draw_grid(cr, get_points_amount(), get_cols_amount(), get_view_port(), canvas_width, canvas_height);
 
   cairo_destroy(cr);

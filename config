@@ -1,2 +1,11 @@
-width=100
-height=100
+width=100,
+height=100,
+block={
+  x0=0,
+  y0=0,
+  width=50,
+  height=50,
+  permittivity=2,
+  permeability=2,
+  conductivity=10
+},

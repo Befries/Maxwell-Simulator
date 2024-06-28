@@ -17,3 +17,4 @@ void free_config_reader(config_info* info_set);
 void set_entries(config_info* info_set);
 
 int scan_key(config_info info);
+int handle_object(config_info* info_set, int index);

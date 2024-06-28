@@ -1,13 +1,21 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "field_manager.h"
 #include "materials.h"
 #include "utils.h"
+
+#define BLOCK_AMOUNT 10
+
+
 void normalize_intensity(double (*norm)(double*, int), double* intensity);
 void bound_view_port(double boundary);
 
 static material** properties;
+// max of BLOCK_AMOUNT blocks
+static int blocks_amount = 0;
+static block blocks[BLOCK_AMOUNT];
 
 static double* fields[3]; 
 static double* fields_buffer[3];
@@ -32,7 +40,7 @@ void update_view_port() {
     for (int i = 0; i < amount; i++) {
       view_port[i] = fabs((fields[0])[i]);
     }
-  }
+  }   
  
   //double test_max = max(view_port, amount);
   //if (test_max > current_max) {
@@ -79,19 +87,46 @@ double get_dt() {
   return dt;
 }
 
+
+void add_block(char* ID, int x0, int y0, int width, int height, double permittivity, double permeability, double conductivity) {
+  char* ID_str = malloc(sizeof(ID));
+  strcpy(ID_str, ID);
+  blocks[blocks_amount++] = (block) {ID_str, x0, y0, width, height, permittivity, permeability, conductivity}; 
+}
+
+
 void init_field_manager(int _rows_amount, int _cols_amount) {
-  
+  init_fields(_rows_amount, _cols_amount);
+  refresh_properties();
+}
+
+
+static void apply_block_properties(block elem, int index) {
+  for (int yi = elem.y0; yi < elem.y0+elem.height;yi++) {
+    for (int xi = elem.x0; xi < elem.x0+elem.width;xi++) {
+      properties[yi*cols_amount+xi] = get_custom_material(index);
+    }
+  }
+}
+
+
+void refresh_properties() {
+  for (int i = 0; i < blocks_amount; i++) {
+    add_custom_material(
+      blocks[i].permittivity,
+      blocks[i].permeability,
+      blocks[i].conductivity, i);
+    apply_block_properties(blocks[i], i);
+  }
+}
+
+
+void init_fields(int _rows_amount, int _cols_amount) {
   amount = _rows_amount * _cols_amount;
   printf("total amount of points: %d \n", amount);
   cols_amount = _cols_amount;
 
-  // properties is an array of pointers to struct of the concerned materials
-  properties = malloc(amount * sizeof(material*));
-  // initially, the whole space is void.
-  material* void_material = get_void_material();
-  for (int i = 0; i < amount; i++) properties[i] = void_material;
-  // W.I.P. rajouter demande config;
-
+  init_properties_array();
   // intensity chosen to be viewed
   int data_size = amount * sizeof(double);
   view_port = malloc(data_size);
@@ -103,12 +138,18 @@ void init_field_manager(int _rows_amount, int _cols_amount) {
   }
   
   clear_fields();
+}
 
+
+void init_properties_array() {
+  properties = malloc(amount * sizeof(material*));
+  material* void_material = get_void_material();
+  for (int i = 0; i < amount; i++) properties[i] = void_material;
 }
 
 
 void clear_fields() {
- for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < amount; j++) (fields[i])[j] = 0;
   }
   mark_dirty();
@@ -126,7 +167,39 @@ void free_fields() {
     free(fields_buffer[i]);
   }
   free(view_port);
+  free(properties);
 }
+
+
+void free_field_manager() {
+  free_fields();
+  free_blocks();
+}
+
+
+void free_blocks() {
+  for (int i = 0; i < blocks_amount; i++) {
+    free(blocks[i].ID);
+  }
+  blocks_amount = 0;
+}
+
+
+int find_block_index(char* ID) {
+  for (int i = 0; i < blocks_amount; i++) {
+    if (strcmp(ID, blocks[i].ID) == 0) return i;
+  }
+  // if ID not found
+  return -1;
+}
+
+
+void free_block(int index) {
+  free(blocks[index].ID);
+  blocks_amount--;
+  for (int i = index; i < blocks_amount; i++) blocks[i] = blocks[i+1];
+}
+
 
 
 double forward_difference(double* current_field, int index);
