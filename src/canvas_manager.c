@@ -55,15 +55,28 @@ int update_canvas(struct modifiables* ui_elements) {
   cr = cairo_create(surface);
   clear_canvas(cr);
   
-  int canvas_width = gtk_widget_get_width(canvas);
-  int canvas_height = gtk_widget_get_height(canvas);
+  double canvas_width = gtk_widget_get_width(canvas);
+  double canvas_height = gtk_widget_get_height(canvas);
+  int points_amount = get_points_amount();
+  int cols_amount = get_cols_amount();
+  int rows_amount = points_amount/cols_amount;
+
+  double atomic_width = canvas_width/cols_amount;
+  double atomic_height = canvas_height/rows_amount;
 
   if (running) {
     update_fields();
     run_time += get_dt();
   }
+  
+  cairo_set_source_rgb(cr, 0.5, 0.5, 0);
+  for (int i = 0; i < get_blocks_amount(); i++) {
+    block cb = get_block(i); 
+    cairo_rectangle(cr, cb.x0, cb.y0, cb.width * atomic_width, cb.height * atomic_height);
+    cairo_fill(cr);
+  }
 
-  draw_grid(cr, get_points_amount(), get_cols_amount(), get_view_port(), canvas_width, canvas_height);
+  draw_grid(cr, get_points_amount(), get_cols_amount(), get_view_port(), atomic_width, atomic_height);
 
   cairo_destroy(cr);
   char time_str[12];
@@ -75,15 +88,12 @@ int update_canvas(struct modifiables* ui_elements) {
 
 
 // takes a grid of double between 0 and 1 and draw it on the canvas
-void draw_grid(cairo_t* cr, int amount, int cols_amount, double* grid, double canvas_width, double canvas_height) {
-  int rows_amount = amount/cols_amount;
-  double atomic_width = canvas_width / cols_amount;
-  double atomic_height = canvas_height / rows_amount;
+void draw_grid(cairo_t* cr, int amount, int cols_amount, double* grid, double atomic_width, double atomic_height) {
 
   cairo_set_line_width(cr, 0);
   
   for (int i = 0; i < amount; i++) {
-    cairo_set_source_rgba(cr, 0, 0, 0, 1 - grid[i]);
+    cairo_set_source_rgba(cr, 0, 0, 0, grid[i]);
     cairo_rectangle(cr,
                     (i % cols_amount) * atomic_width,
                     (i / cols_amount) * atomic_height,

@@ -21,6 +21,8 @@ int get_points_amount();
 int get_cols_amount();
 double* get_view_port();
 double get_dt();
+int get_blocks_amount();
+block get_block(int index);
 
 void clear_fields();
 void mark_dirty();

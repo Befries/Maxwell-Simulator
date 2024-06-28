@@ -75,6 +75,16 @@ int get_cols_amount() {
 }
 
 
+int get_blocks_amount() {
+  return blocks_amount;
+}
+
+
+block get_block(int index) {
+  return blocks[index];
+}
+
+
 double* get_view_port() {
   if(is_dirty) {
     update_view_port();
