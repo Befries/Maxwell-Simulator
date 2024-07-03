@@ -69,8 +69,8 @@ int update_canvas(struct modifiables* ui_elements) {
     run_time += get_dt();
   }
   
-  cairo_set_source_rgb(cr, 0.5, 0.5, 0);
   for (int i = 0; i < get_blocks_amount(); i++) {
+    cairo_set_source_rgb(cr, 0.5, 0.5, 0);
     block cb = get_block(i); 
     cairo_rectangle(cr, cb.x0, cb.y0, cb.width * atomic_width, cb.height * atomic_height);
     cairo_fill(cr);

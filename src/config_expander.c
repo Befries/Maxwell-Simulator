@@ -6,14 +6,28 @@
 
 static GtkEntry** init_properties_grid();
 static void set_global_margin(GtkWidget* widget, int start, int end, int top, int bottom);
+static GtkWidget* block_interface_new(block b);
+static void set_double_entry(char* format, GtkEntry* entry, double variable);
+static void set_int_entry(GtkEntry* entry, int variable);
 static GtkEntry* add_property_entry(GtkGrid* grid, char* label, int nchar, int col, int row, int col_span, int row_span);
 
 static GtkBox* box;
+static GtkBox* block_box;
 
 void init_expander(GtkBox* expander_box) {
   box = expander_box;
-  GtkEntry** entries = init_properties_grid();
-  display_config(entries);
+  GtkWidget* block_box_widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+  block_box = GTK_BOX(block_box_widget);
+
+  GtkEntry** global_entries = init_properties_grid();
+  GtkWidget* scroller_window = gtk_scrolled_window_new();
+
+  gtk_box_append(box, scroller_window);
+  gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroller_window), block_box_widget);
+  gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(scroller_window), 600);
+  gtk_widget_set_size_request(scroller_window, 0, 400);
+
+  display_config(global_entries);
 
 }
 
@@ -40,6 +54,69 @@ void display_config(GtkEntry** entries) {
   char mu0_str[6];
   sprintf(mu0_str, "%2.3f", mu0);
   gtk_editable_set_text(GTK_EDITABLE(entries[3]), mu0_str);
+
+  
+  // display the blocks
+  for (int i = 0; i < get_blocks_amount(); i++) {
+    GtkWidget* block_interface = block_interface_new(get_block(i));
+    gtk_box_append(block_box, block_interface);
+
+  }
+  
+  
+}
+
+
+static GtkWidget* block_interface_new(block b) {
+  // Grid that contains the elements
+  GtkWidget* grid = gtk_grid_new();
+  gtk_widget_set_hexpand(grid, TRUE);
+  gtk_widget_set_halign(grid, GTK_ALIGN_FILL);
+  set_global_margin(grid, 4, 4, 4, 4);
+
+  GtkGrid* grid_cast = GTK_GRID(grid);
+  
+  GtkWidget* separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_grid_attach(grid_cast, separator, 0, 0, 2, 1);
+  
+  GtkWidget* block_name = gtk_label_new(b.ID);
+  gtk_label_set_max_width_chars(GTK_LABEL(block_name), 12);
+  gtk_grid_attach(grid_cast, block_name, 0, 1, 1, 1);
+
+  GtkEntry* e_entry = add_property_entry(grid_cast, "e", 6, 1, 1, 1, 1);
+  set_double_entry("%2.3f", e_entry, b.permittivity);
+
+  GtkEntry* m_entry = add_property_entry(grid_cast, "mu", 6, 0, 2, 1, 1);
+  set_double_entry("%2.3f", m_entry, b.permeability);
+
+  GtkEntry* s_entry = add_property_entry(grid_cast, "sigma", 6, 1, 2, 1, 1);
+  set_double_entry("%2.3f", s_entry, b.conductivity);
+
+  GtkEntry* x0_entry = add_property_entry(grid_cast, "x0", 4, 0, 3, 1, 1);
+  set_int_entry(x0_entry, b.x0);
+
+  GtkEntry* y0_entry = add_property_entry(grid_cast, "y0", 4, 1, 3, 1, 1);
+  set_int_entry(y0_entry, b.y0);
+
+  GtkEntry* width_entry = add_property_entry(grid_cast, "width", 4, 0, 4, 1, 1);
+  set_int_entry(width_entry, b.width);
+
+  GtkEntry* height_entry = add_property_entry(grid_cast, "height", 4, 1, 4, 1, 1);
+  set_int_entry(height_entry, b.height);
+
+  return grid;
+}
+
+static void set_double_entry(char* format, GtkEntry* entry, double variable) {
+  char str_buffer[12];
+  sprintf(str_buffer, format, variable);
+  gtk_editable_set_text(GTK_EDITABLE(entry), str_buffer);
+}
+
+static void set_int_entry(GtkEntry* entry, int variable) {
+  char str_buffer[12];
+  sprintf(str_buffer, "%d", variable);
+  gtk_editable_set_text(GTK_EDITABLE(entry), str_buffer);
 }
 
 

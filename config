@@ -1,6 +1,6 @@
 width=100,
 height=100,
-block={
+block1={
   x0=0,
   y0=0,
   width=50,
@@ -9,3 +9,30 @@ block={
   permeability=2,
   conductivity=10
 },
+block2={
+  x0=40,
+  y0=60,
+  width=30,
+  height=20,
+  permittivity=4,
+  permeability=4,
+  conductivity=100
+},
+block3={
+  x0=10,
+  y0=70,
+  width=10,
+  height=20,
+  permittivity=1,
+  permeability=1,
+  conductivity=1000
+},
+block4={
+  x0=80,
+  y0=60,
+  width=10,
+  height=10,
+  permittivity=20,
+  permeability=20,
+  conductivity=0.2,
+}
